@@ -1,5 +1,8 @@
 import numpy as np
 from matplotlib import pyplot as plt
+from matplotlib import cm
+from pid import PID
+from trajectory import Trajectory
 
 class Quaternion:
   def __init__(self,*args,**kwargs):
@@ -62,6 +65,8 @@ class model:
     self.pos = pos
   
   def initOrientation(self,orientation:np.ndarray):
+    if not np.isclose(np.dot(orientation,self.pos),0,atol=1e-6):
+      raise ValueError('initOrientaion: the orientation vector is not orthogonal to the position vector.')
     self.orientation = orientation
 
   def set_v_n_w(self,v,w):
@@ -69,27 +74,74 @@ class model:
     self.w = w
 
   def step(self,dt):
-    self.pos += self.v * self.orientation * dt
-    self.pos = self.pos / np.linalg.norm(self.pos) * self.radius
-    pos_ = self.pos / np.linalg.norm(self.pos)
     half_theta = self.w * dt / 2
-    self.q_vel = Quaternion(np.cos(half_theta),np.sin(half_theta)*pos_)
+    self.q_vel = Quaternion(np.cos(half_theta),np.sin(half_theta)*self.pos)
     q = self.q_vel @ Quaternion(0,self.orientation) @ self.q_vel.inv()
     self.orientation = np.array([q[1],q[2],q[3]])
 
-pos = []
-sp = model(1.0)
-sp.initOrientation(np.array([0,0,1]))
-for i in range(50):
-  sp.set_v_n_w(0.1,0.5)
-  sp.step(0.1)
-  pos.append(sp.pos)
+    half_angle = self.v / self.radius / 2 * dt
+    normal = np.cross(self.pos,self.orientation)
+    normal /= np.linalg.norm(normal)
+    q_forward = Quaternion(np.cos(half_angle),np.sin(half_angle)*normal)
+    q = q_forward @ Quaternion(0,self.pos) @ q_forward.inv()
+    self.pos = np.array([q[1],q[2],q[3]])
 
-pos = np.asarray(pos)
-print(pos)
+def draw_sphere(plot):
+  # 创建球面网格
+  u = np.linspace(0, 2 * np.pi, 100)  # 经度
+  v = np.linspace(0, np.pi, 50)       # 纬度
+  x = sp.radius * np.outer(np.cos(u), np.sin(v))
+  y = sp.radius * np.outer(np.sin(u), np.sin(v))
+  z = sp.radius * np.outer(np.ones(np.size(u)), np.cos(v))
+  # 绘制球体表面
+  plot.plot_surface(x, y, z, 
+                  rstride=2, cstride=2, 
+                  color='lightblue', 
+                  alpha=0.3, 
+                  edgecolor='grey', 
+                  linewidth=0.5)
+  
+def draw_traj(plot,traj,color):
+  plot.plot(traj[:,0],traj[:,1],traj[:,2],color)
+
+sp = model(1.0)
+
 figure = plt.figure()
 ax = figure.add_subplot(111,projection='3d')
-ax.plot(pos[:,0],pos[:,1],pos[:,2])
+traj = Trajectory()
+traj.initFromJson('./traj.json')
+# traj
+dt = 0.01
+points = []
+sp.initPos(traj.getPos(0))
+sp.initOrientation(np.array([1,1,0]))
+steering_pid = PID(1,0,0,20)
+forward_pid = PID(10,0,0,10)
+pos = []
+e = []
+for i in range(700):
+  pt_ = traj.getPos(dt*i)
+  pt = pt_ / np.linalg.norm(pt_) * sp.radius
+  R_z = sp.pos / np.linalg.norm(sp.pos)
+  R_x = sp.orientation / np.linalg.norm(sp.orientation)
+  R_y = np.cross(R_z,R_x)
+  R = np.column_stack([R_x,R_y,R_z])
+  r = R.T @ (pt - sp.pos)
+  theta = np.arccos((r[2]+sp.radius)/sp.radius)
+  phi = np.arctan2(r[1],r[0])
+  e.append(theta)
+  w = steering_pid.calc(-phi,0)
+  v = forward_pid.calc(-theta,0)
+  # print(v,w)
+  sp.set_v_n_w(v,w)
+  sp.step(dt)
+  pos.append(sp.pos)
+  points.append(pt)
+
+pos = np.asarray(pos)
+points = np.asarray(points)
+draw_traj(ax,pos,'b')
+draw_traj(ax,points,'r')
 ax.set_box_aspect([1,1,1])
 ax.set_xlabel('X')
 ax.set_ylabel('Y')
@@ -97,4 +149,7 @@ ax.set_zlabel('Z')
 ax.set_xlim(-2,2)
 ax.set_ylim(-2,2)
 ax.set_zlim(-2,2)
+f = plt.figure('e')
+p = f.add_subplot()
+p.plot(e)
 plt.show()
