@@ -1,0 +1,1 @@
+/usr/bin/c++ -std=c++17 -g -O0 -DDEBUG CMakeFiles/main2.dir/main2.cpp.o CMakeFiles/main2.dir/Trajectory.cpp.o -o main2 

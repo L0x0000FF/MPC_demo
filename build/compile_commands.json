@@ -8,5 +8,15 @@
   "directory": "/home/lbz/Code/MPC_demo/build",
   "command": "/usr/bin/g++ -std=c++17 -g -O0 -DDEBUG -o CMakeFiles/main.dir/Trajectory.cpp.o -c /home/lbz/Code/MPC_demo/cpp/Trajectory.cpp",
   "file": "/home/lbz/Code/MPC_demo/cpp/Trajectory.cpp"
+},
+{
+  "directory": "/home/lbz/Code/MPC_demo/build",
+  "command": "/usr/bin/g++ -std=c++17 -g -O0 -DDEBUG -o CMakeFiles/main2.dir/main2.cpp.o -c /home/lbz/Code/MPC_demo/cpp/main2.cpp",
+  "file": "/home/lbz/Code/MPC_demo/cpp/main2.cpp"
+},
+{
+  "directory": "/home/lbz/Code/MPC_demo/build",
+  "command": "/usr/bin/g++ -std=c++17 -g -O0 -DDEBUG -o CMakeFiles/main2.dir/Trajectory.cpp.o -c /home/lbz/Code/MPC_demo/cpp/Trajectory.cpp",
+  "file": "/home/lbz/Code/MPC_demo/cpp/Trajectory.cpp"
 }
 ]

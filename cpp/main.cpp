@@ -20,7 +20,7 @@ int main() {
   Trajectory b = a;
   Trajectory c(a);
   Trajectory* d = new Trajectory(a);
-  Vector3f pos = a.get_pos(1.2);
+  Vector3f pos = d->get_pos(1.2);
   cout << pos.x << pos.y << pos.z << endl;
   delete d;
   return 0;

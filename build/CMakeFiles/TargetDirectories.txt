@@ -1,3 +1,4 @@
 /home/lbz/Code/MPC_demo/build/CMakeFiles/main.dir
+/home/lbz/Code/MPC_demo/build/CMakeFiles/main2.dir
 /home/lbz/Code/MPC_demo/build/CMakeFiles/edit_cache.dir
 /home/lbz/Code/MPC_demo/build/CMakeFiles/rebuild_cache.dir

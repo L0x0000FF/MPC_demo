@@ -12,3 +12,4 @@ set(CMAKE_BUILD_TYPE "Debug")
 set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -DDEBUG")
 
 add_executable(main main.cpp Trajectory.cpp)
+add_executable(main2 main2.cpp Trajectory.cpp)

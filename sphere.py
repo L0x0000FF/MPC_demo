@@ -26,7 +26,7 @@ class Quaternion:
                         self[0]*other[1] + self[1]*other[0] + self[2]*other[3] - self[3]*other[2],
                         self[0]*other[2] + self[2]*other[0] + self[3]*other[1] - self[1]*other[3],
                         self[0]*other[3] + self[3]*other[0] + self[1]*other[2] - self[2]*other[1])
-    return result
+    return result / result.norm()
   
   def __add__(self,other):
     return Quaternion(self[0]+other[0],self[1]+other[1],self[2]+other[2],self[3]+other[3])
@@ -119,8 +119,11 @@ steering_pid = PID(1,0,0,20)
 forward_pid = PID(10,0,0,10)
 pos = []
 e = []
+a = []
+b = []
+T = np.sum(traj.durations)
 for i in range(700):
-  pt_ = traj.getPos(dt*i)
+  pt_ = traj.getPos(T)
   pt = pt_ / np.linalg.norm(pt_) * sp.radius
   R_z = sp.pos / np.linalg.norm(sp.pos)
   R_x = sp.orientation / np.linalg.norm(sp.orientation)
@@ -129,6 +132,8 @@ for i in range(700):
   r = R.T @ (pt - sp.pos)
   theta = np.arccos((r[2]+sp.radius)/sp.radius)
   phi = np.arctan2(r[1],r[0])
+  a.append(theta)
+  b.append(phi)
   e.append(theta)
   w = steering_pid.calc(-phi,0)
   v = forward_pid.calc(-theta,0)
@@ -149,7 +154,13 @@ ax.set_zlabel('Z')
 ax.set_xlim(-2,2)
 ax.set_ylim(-2,2)
 ax.set_zlim(-2,2)
-f = plt.figure('e')
-p = f.add_subplot()
-p.plot(e)
+# f = plt.figure('e')
+# p = f.add_subplot()
+# p.plot(e)
+f1 = plt.figure('t')
+p1 = f1.add_subplot()
+p1.plot(a)
+f2 = plt.figure('p')
+p2 = f2.add_subplot()
+p2.plot(b)
 plt.show()
